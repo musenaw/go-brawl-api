@@ -12,6 +12,7 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Get("/", controllers.StaticHandlerJSON)
+	r.Get("/{playerId}", controllers.GetPlayerInfo)
 
 	r.Post("/signup", controllers.StaticHandlerJSON)
 
