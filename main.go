@@ -13,6 +13,7 @@ func main() {
 
 	r.Get("/", controllers.StaticHandlerJSON)
 	r.Get("/{playerId}", controllers.GetPlayerInfo)
+	r.Get("/battlelog/{playerId}", controllers.GetPlayerBattlelog)
 
 	r.Post("/signup", controllers.StaticHandlerJSON)
 
