@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
@@ -105,7 +106,8 @@ func GetPlayerBattlelog(w http.ResponseWriter, r *http.Request) {
 	playerId := chi.URLParam(r, "playerId")
 
 	url := fmt.Sprintf("https://api.brawlstars.com/v1/players/%%23%s/battlelog", playerId)
-	battleType := r.URL.Query().Get("type")
+	battleType := strings.Trim(r.URL.Query().Get("type"), " ")
+	mode := strings.Trim(r.URL.Query().Get("mode"), " ")
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -133,9 +135,17 @@ func GetPlayerBattlelog(w http.ResponseWriter, r *http.Request) {
 	for _, v := range battleData {
 
 		battle := v.Battle
-		if battle.Type == battleType {
-			result = append(result, v)
+		if battleType != "" && battle.Type != battleType {
+			continue
 		}
+
+		event := v.Event
+		if mode != "" && event.Mode != mode {
+			continue
+		}
+
+		result = append(result, v)
+
 	}
 
 	w.Header().Set("Content-Type", "application/json")
