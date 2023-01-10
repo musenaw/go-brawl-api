@@ -72,6 +72,35 @@ func GetPlayerInfo(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(myStoredVariable)
 }
 
+type Battle struct {
+	Duration   int
+	Mode       string
+	Result     string
+	StarPlayer map[string]any
+	Teams      [][]map[string]any
+	Type       string
+}
+
+type Event struct {
+	Id   int
+	Map  string
+	Mode string
+}
+
+type BattleData struct {
+	Battle     Battle
+	BattleTime string
+	Event      Event
+}
+
+type Paging struct {
+	Cursors map[string]any
+}
+type BattleLog struct {
+	Items  []BattleData
+	Paging Paging
+}
+
 func GetPlayerBattlelog(w http.ResponseWriter, r *http.Request) {
 	playerId := chi.URLParam(r, "playerId")
 
@@ -94,18 +123,18 @@ func GetPlayerBattlelog(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 	}
-	var myStoredVariable map[string]any
+	var myStoredVariable BattleLog
 	bodyString := string(body)
 	json.Unmarshal([]byte(bodyString), &myStoredVariable)
 
-	battles := myStoredVariable["items"].([]interface{})
+	battleData := myStoredVariable.Items
 
-	result := make([]map[string]any, 0)
-	for _, v := range battles {
-		values := v.(map[string]any)
-		battle := values["battle"].(map[string]any)
-		if battle["type"] == battleType {
-			result = append(result, values)
+	result := make([]BattleData, 0)
+	for _, v := range battleData {
+
+		battle := v.Battle
+		if battle.Type == battleType {
+			result = append(result, v)
 		}
 	}
 
