@@ -100,7 +100,7 @@ func GetPlayerBattlelog(w http.ResponseWriter, r *http.Request) {
 
 	battles := myStoredVariable["items"].([]interface{})
 
-	var result []map[string]any
+	result := make([]map[string]any, 0)
 	for _, v := range battles {
 		values := v.(map[string]any)
 		battle := values["battle"].(map[string]any)

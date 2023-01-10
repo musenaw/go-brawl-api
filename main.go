@@ -12,8 +12,8 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Get("/", controllers.StaticHandlerJSON)
-	r.Get("/{playerId}", controllers.GetPlayerInfo)
-	r.Get("/battlelog/{playerId}", controllers.GetPlayerBattlelog)
+	r.Get("/players/{playerId}", controllers.GetPlayerInfo)
+	r.Get("/players/{playerId}/battlelog", controllers.GetPlayerBattlelog)
 
 	r.Post("/signup", controllers.StaticHandlerJSON)
 
