@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,10 +10,12 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
@@ -61,13 +64,47 @@ func StaticHandlerJSON(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResp)
 }
 
-type PlayerInfo struct {
-	Species     string
-	Description string
+// Service service
+type Service struct {
+	client *redis.Client
+}
+
+func NewRedisClient() Service {
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+	newService := Service{client: rdb}
+	return newService
+}
+
+// Set sets key value
+func (s *Service) Set(ctx context.Context, key string, value interface{}) error {
+	exp := time.Duration(20 * time.Second)
+	return s.client.Set(ctx, key, value, exp).Err()
+}
+
+// Get key value
+func (s *Service) Get(ctx context.Context, key string) (string, error) {
+	return s.client.Get(ctx, key).Result()
 }
 
 func GetPlayerInfo(w http.ResponseWriter, r *http.Request) {
 	playerId := chi.URLParam(r, "playerId")
+
+	ctx := context.Background()
+	redisClient := NewRedisClient()
+	val, _ := redisClient.Get(ctx, playerId)
+	if val != "" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		w.Write([]byte(val))
+		return
+	}
+
+	fmt.Print("LLEGOOOO")
+	fmt.Println(val == "")
 
 	url := fmt.Sprintf("https://api.brawlstars.com/v1/players/%%23%s", playerId)
 
@@ -89,7 +126,7 @@ func GetPlayerInfo(w http.ResponseWriter, r *http.Request) {
 		// log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 		panic(err)
 	}
-	var newUserData models.Input
+	var newUserData models.UserInput
 	bodyString := string(body)
 	json.Unmarshal([]byte(bodyString), &newUserData)
 
@@ -98,7 +135,6 @@ func GetPlayerInfo(w http.ResponseWriter, r *http.Request) {
 	us := models.UserService{
 		DB: db,
 	}
-	fmt.Println(newUserData)
 	userData := models.User(newUserData)
 	err = us.CreateOrUpdate(&userData)
 
@@ -107,6 +143,10 @@ func GetPlayerInfo(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	marhsaledUser, _ := json.Marshal(userData)
+	errDB := redisClient.Set(ctx, playerId, marhsaledUser)
+	fmt.Println(errDB)
+	fmt.Println(marhsaledUser)
 	if err := json.NewEncoder(w).Encode(userData); err != nil {
 		panic(err)
 	}

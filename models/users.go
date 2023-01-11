@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-type Input struct {
+type UserInput struct {
 	ID                                   uint `gorm:"primaryKey"`
 	CreatedAt                            time.Time
 	UpdatedAt                            time.Time
