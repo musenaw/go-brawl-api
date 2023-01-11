@@ -60,6 +60,15 @@ func (us *UserService) Migrate() error {
 }
 
 func (us *UserService) Create(newU *User) error {
+	result := us.DB.Create(newU)
+	if result.Error != nil {
+		fmt.Println(result.Error)
+		return fmt.Errorf("an error occurred while creating")
+	}
+	return nil
+}
+
+func (us *UserService) FindOrCreate(newU *User) error {
 	// result := us.DB.Create(newU)
 	result := us.DB.Where(User{Tag: newU.Tag}).FirstOrCreate(newU)
 	if result.Error != nil {
