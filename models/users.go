@@ -69,7 +69,6 @@ func (us *UserService) Create(newU *User) error {
 }
 
 func (us *UserService) FindOrCreate(newU *User) error {
-	// result := us.DB.Create(newU)
 	result := us.DB.Where(User{Tag: newU.Tag}).FirstOrCreate(newU)
 	if result.Error != nil {
 		fmt.Println(result.Error)
@@ -79,7 +78,6 @@ func (us *UserService) FindOrCreate(newU *User) error {
 }
 
 func (us *UserService) CreateOrUpdate(newU *User) error {
-
 	if us.DB.Model(newU).Clauses(clause.Returning{}).Where(User{Tag: newU.Tag}).Updates(newU).RowsAffected == 1 {
 		fmt.Println("Updated successfully")
 		return nil
