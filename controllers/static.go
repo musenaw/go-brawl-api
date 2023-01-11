@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"musenaw/go-brawl-api/models"
 	"net/http"
 	"os"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -28,38 +28,6 @@ func goDotEnvVariable(key string) string {
 	return os.Getenv(key)
 }
 
-func getDb(config PostgresConfig) (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.Open(config.String()), &gorm.Config{})
-	if err != nil {
-		return nil, fmt.Errorf("open: %w", err)
-	}
-	return db, nil
-}
-
-func DefaultPostgresConfig() PostgresConfig {
-	return PostgresConfig{
-		Host:     "localhost",
-		Port:     "5432",
-		User:     "user",
-		Password: "password",
-		Database: "brawl",
-		SSLMode:  "disable",
-	}
-}
-
-type PostgresConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	Database string
-	SSLMode  string
-}
-
-func (cfg PostgresConfig) String() string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Database, cfg.SSLMode)
-}
-
 type Product struct {
 	gorm.Model
 	Code  string
@@ -70,8 +38,8 @@ func StaticHandlerJSON(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 
-	cfg := DefaultPostgresConfig()
-	db, err := getDb(cfg)
+	cfg := models.DefaultPostgresConfig()
+	db, err := models.GetDb(cfg)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
