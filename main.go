@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"musenaw/go-brawl-api/controllers"
+	"musenaw/go-brawl-api/models"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -10,6 +11,13 @@ import (
 
 func main() {
 	r := chi.NewRouter()
+
+	cfg := models.DefaultPostgresConfig()
+	err := models.Open(cfg)
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
 
 	r.Get("/", controllers.StaticHandlerJSON)
 	r.Get("/players/{playerId}", controllers.GetPlayerInfo)

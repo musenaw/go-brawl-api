@@ -7,6 +7,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var DB *gorm.DB
+
 type PostgresConfig struct {
 	Host     string
 	Port     string
@@ -31,10 +33,11 @@ func (cfg PostgresConfig) String() string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Database, cfg.SSLMode)
 }
 
-func GetDb(config PostgresConfig) (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.Open(config.String()), &gorm.Config{})
+func Open(config PostgresConfig) error {
+	var err error
+	DB, err = gorm.Open(postgres.Open(config.String()), &gorm.Config{})
 	if err != nil {
-		return nil, fmt.Errorf("open: %w", err)
+		return fmt.Errorf("open: %w", err)
 	}
-	return db, nil
+	return nil
 }

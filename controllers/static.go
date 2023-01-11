@@ -38,14 +38,18 @@ func StaticHandlerJSON(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 
-	cfg := models.DefaultPostgresConfig()
-	db, err := models.GetDb(cfg)
+	db := models.DB
+
+	us := models.UserService{
+		DB: db,
+	}
+	err := us.Migrate()
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
 	}
 
-	db.Create(&Product{Code: "D42", Price: 100})
+	// db.Create(&Product{Code: "D42", Price: 100})
 
 	resp := make(map[string]string)
 	resp["message"] = "Working"
@@ -83,13 +87,27 @@ func GetPlayerInfo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 	}
-	var myStoredVariable map[string]any
+	var newUserData models.Input
 	bodyString := string(body)
-	json.Unmarshal([]byte(bodyString), &myStoredVariable)
+	json.Unmarshal([]byte(bodyString), &newUserData)
 
+	db := models.DB
+
+	us := models.UserService{
+		DB: db,
+	}
+	fmt.Println(newUserData)
+	userData := models.User(newUserData)
+	err = us.Create(&userData)
+
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(myStoredVariable)
+	if err := json.NewEncoder(w).Encode(userData); err != nil {
+		panic(err)
+	}
 }
 
 type Battle struct {
