@@ -55,7 +55,8 @@ func StaticHandlerJSON(w http.ResponseWriter, r *http.Request) {
 	resp["message"] = "Working"
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		// 	log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		panic(err)
 	}
 	w.Write(jsonResp)
 }
@@ -80,12 +81,13 @@ func GetPlayerInfo(w http.ResponseWriter, r *http.Request) {
 	resp, err := client.Do(req)
 	if err != nil || resp.StatusCode != 200 {
 		fmt.Println(resp.Status)
-		// log.Fatalf("Error happened Err: %s", err)
+		panic(err)
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		// log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		panic(err)
 	}
 	var newUserData models.Input
 	bodyString := string(body)
@@ -101,7 +103,7 @@ func GetPlayerInfo(w http.ResponseWriter, r *http.Request) {
 	err = us.Create(&userData)
 
 	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		panic(err)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -155,12 +157,12 @@ func GetPlayerBattlelog(w http.ResponseWriter, r *http.Request) {
 	resp, err := client.Do(req)
 	if err != nil || resp.StatusCode != 200 {
 		fmt.Println(resp.Status)
-		// log.Fatalf("Error happened Err: %s", err)
+		panic(err)
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		panic(err)
 	}
 	var myStoredVariable BattleLog
 	bodyString := string(body)
@@ -182,7 +184,6 @@ func GetPlayerBattlelog(w http.ResponseWriter, r *http.Request) {
 		}
 
 		result = append(result, v)
-
 	}
 
 	w.Header().Set("Content-Type", "application/json")
