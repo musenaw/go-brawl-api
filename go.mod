@@ -5,6 +5,8 @@ go 1.19
 require (
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/joho/godotenv v1.4.0
+	gorm.io/driver/postgres v1.4.6
+	gorm.io/gorm v1.24.3
 )
 
 require (
@@ -15,6 +17,4 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
-	gorm.io/driver/postgres v1.4.6 // indirect
-	gorm.io/gorm v1.24.3 // indirect
 )

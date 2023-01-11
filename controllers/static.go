@@ -100,7 +100,7 @@ func GetPlayerInfo(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(newUserData)
 	userData := models.User(newUserData)
-	err = us.Create(&userData)
+	err = us.CreateOrUpdate(&userData)
 
 	if err != nil {
 		panic(err)
