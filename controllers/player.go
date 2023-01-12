@@ -103,9 +103,6 @@ func GetPlayerInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Print("LLEGOOOO")
-	fmt.Println(val == "")
-
 	url := fmt.Sprintf("https://api.brawlstars.com/v1/players/%%23%s", playerId)
 
 	client := &http.Client{}
@@ -144,9 +141,10 @@ func GetPlayerInfo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	marhsaledUser, _ := json.Marshal(userData)
-	errDB := redisClient.Set(ctx, playerId, marhsaledUser)
-	fmt.Println(errDB)
-	fmt.Println(marhsaledUser)
+	err = redisClient.Set(ctx, playerId, marhsaledUser)
+	if err != nil {
+		panic(err)
+	}
 	if err := json.NewEncoder(w).Encode(userData); err != nil {
 		panic(err)
 	}
